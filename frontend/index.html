@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Analyzer</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+<header>
+    <h2>ResumeAI</h2>
+    <nav>
+        <a href="#features">Features</a>
+        <a href="#analyze">Analyze Resume</a>
+        <a href="#about">About</a>
+    </nav>
+</header>
+<main>
+    <section Class="hero">
+        <h1>Make your Resume Job-Ready</h1>
+
+        <p>
+            Analyze your resume using AI.
+            Discover skill gaps and improve your chances of matching your dream job.
+        </p>
+        <a href="#analyze" class="btn">
+            Analyze My Resume
+        </a>
+    </section>
+
+    <section id="features" class="features">
+        <h2>What We offer</h2>
+        <div class="feature-container">
+            <div class="feature">
+                <h3>Resume Analysis</h3>
+                <p>Extract important information from your resume.</p>
+            </div>
+
+            <div class="feature">
+                <h3>Job Matching</h3>
+                <p>Compare your skills with job requirements.</p>
+            </div>
+
+            <div class="feature">
+                <h3>Skill Gap Analysis</h3>
+                <p>Identify the skills you need to improve.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="analyze" class="analyze">
+        <h2>Analyze Your Resume</h2>
+        <label for="resume">Upload your resume (PDF):</label>
+
+        <input
+            type="file"
+            id="resume"
+            accept=".pdf"
+        >
+
+        <label for="job">Paste Job Description:</label>
+
+        <textarea id="job" placeholder="Paste the job description here..."></textarea>
+
+        <button type="button">
+            Analyze Resume
+        </button>
+    </section>
+</main>
+<footer id="about">
+    <p>ResumeAI | Built as a learning project</p>
+</footer>
+</body>
+</html>
