@@ -1,0 +1,14 @@
+
+{
+  "jobTitle": "Java Developer",
+  "company": "TechNova",
+  "requiredSkills": [
+    "Java",
+    "Spring Boot",
+    "SQL",
+    "React",
+    "REST API"
+  ],
+  "minimumExperience": 2,
+  "location": "Bangalore, India"
+}
