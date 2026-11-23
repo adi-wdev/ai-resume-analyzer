@@ -1,5 +1,6 @@
 package com.resumeanalyzer.backend.service;
 
+import com.resumeanalyzer.backend.exception.ResourceNotFoundException;
 import com.resumeanalyzer.backend.model.Job;
 import com.resumeanalyzer.backend.repository.JobRepository;
 
@@ -45,7 +46,11 @@ public class JobService {
 
     // Get job by ID
     public Job getJobById(Long id) {
-        return jobRepository.findById(id).orElse(null);
+        return jobRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Job not found with ID: " + id
+                )
+        );
     }
 
     // Search jobs by location

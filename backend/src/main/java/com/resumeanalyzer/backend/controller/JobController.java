@@ -2,7 +2,7 @@ package com.resumeanalyzer.backend.controller;
 
 import com.resumeanalyzer.backend.model.Job;
 import com.resumeanalyzer.backend.service.JobService;
-
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +21,8 @@ public class JobController {
 
     // Create job
     @PostMapping
-    public ResponseEntity<Job> createJob(@RequestBody Job job) {
+    public ResponseEntity<Job> createJob(
+            @Valid @RequestBody Job job) {
 
         Job savedJob = jobService.saveJob(job);
 
@@ -68,7 +69,7 @@ public class JobController {
     @PutMapping("/{id}")
     public ResponseEntity<Job> updateJob(
             @PathVariable Long id,
-            @RequestBody Job job) {
+            @Valid @RequestBody Job job) {
 
         Job updatedJob = jobService.updateJob(id, job);
 

@@ -5,8 +5,9 @@ import com.resumeanalyzer.backend.model.Candidate;
 import com.resumeanalyzer.backend.service.CandidateService;
 import com.resumeanalyzer.backend.repository.CandidateRepository;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -24,8 +25,10 @@ public class CandidateController {
     }
 
     @PostMapping("/candidates")
-    public Candidate createCandidate(@RequestBody Candidate candidate) {
-        return candidateService.saveCandidate(candidate);
+    public ResponseEntity<Candidate> createCandidate(
+            @Valid @RequestBody Candidate candidate) {
+
+        return ResponseEntity.ok(candidateService.saveCandidate(candidate));
     }
 
     @GetMapping("/candidates")

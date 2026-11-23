@@ -3,6 +3,9 @@ package com.resumeanalyzer.backend.model;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "candidates")
@@ -12,12 +15,17 @@ public class Candidate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Candidate name is required")
     @Column(nullable = false)
     private String name;
 
+    @NotBlank(message = "Email is required")
+    @Email(message = "Please provide a valid email address")
     @Column(unique = true)
     private String email;
 
+
+    @Min(value = 0, message = "Experience cannot be negative")
     private int experience;
     private String phone;
 
@@ -28,6 +36,8 @@ public class Candidate {
     )
     @Column(name = "skill")
     private List<String> skills = new ArrayList<>();
+
+
 
     public Candidate() {
     }

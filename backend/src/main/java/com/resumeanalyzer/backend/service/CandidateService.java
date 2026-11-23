@@ -1,5 +1,6 @@
 package com.resumeanalyzer.backend.service;
 
+import com.resumeanalyzer.backend.exception.ResourceNotFoundException;
 import com.resumeanalyzer.backend.model.Candidate;
 import com.resumeanalyzer.backend.repository.CandidateRepository;
 
@@ -25,7 +26,11 @@ public class CandidateService {
     }
 
     public Candidate getCandidateById(Long id) {
-        return candidateRepository.findById(id).orElse(null);
+        return candidateRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Candidate not found with ID: " + id
+                )
+        );
     }
 
     public String checkCandidateExperience(int experience) {

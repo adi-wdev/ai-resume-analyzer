@@ -2,6 +2,8 @@ package com.resumeanalyzer.backend.model;
 
 import jakarta.persistence.*;
 import java.util.List;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "jobs")
@@ -11,12 +13,15 @@ public class Job {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Job title is required")
     @Column(nullable = false)
     private String jobTitle;
 
+    @NotBlank(message = "Company name is required")
     @Column(nullable = false)
     private String company;
 
+    @NotBlank(message = "Location is required")
     private String location;
 
     @ElementCollection
@@ -27,6 +32,7 @@ public class Job {
     @Column(name = "skill")
     private List<String> requiredSkills;
 
+    @Min(value = 0, message = "Minimum experience cannot be negative")
     private Integer minimumExperience;
 
     public Job() {
