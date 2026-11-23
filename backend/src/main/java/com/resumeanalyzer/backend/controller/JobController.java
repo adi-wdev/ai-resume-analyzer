@@ -1,4 +1,3 @@
-
 package com.resumeanalyzer.backend.controller;
 
 import com.resumeanalyzer.backend.model.Job;
@@ -8,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/jobs")
@@ -16,29 +15,37 @@ public class JobController {
 
     private final JobService jobService;
 
-    // Constructor injection
     public JobController(JobService jobService) {
         this.jobService = jobService;
     }
 
-    // Temporary in-memory storage for GET endpoints
-    private final Map<Integer, Job> jobs = new HashMap<>();
+    // Create job
+    @PostMapping
+    public ResponseEntity<Job> createJob(@RequestBody Job job) {
 
-    {
-        jobs.put(10, new Job(
-                "Java Developer",
-                "Google",
-                "Bangalore",
-                List.of("Java", "Spring Boot", "SQL"),
-                2
-        ));
+        Job savedJob = jobService.saveJob(job);
+
+        return new ResponseEntity<>(
+                savedJob,
+                HttpStatus.CREATED
+        );
     }
 
-    // GET /jobs/10
-    @GetMapping("/{id}")
-    public ResponseEntity<Job> getJob(@PathVariable int id) {
+    // Get all jobs
+    @GetMapping
+    public ResponseEntity<List<Job>> getAllJobs() {
 
-        Job job = jobs.get(id);
+        return ResponseEntity.ok(
+                jobService.getAllJobs()
+        );
+    }
+
+    // Get job by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Job> getJobById(
+            @PathVariable Long id) {
+
+        Job job = jobService.getJobById(id);
 
         if (job == null) {
             return ResponseEntity.notFound().build();
@@ -47,27 +54,59 @@ public class JobController {
         return ResponseEntity.ok(job);
     }
 
-    // GET /jobs/search?location=Bangalore
+    // Search by location
     @GetMapping("/search")
-    public List<Job> searchJobs(@RequestParam String location) {
+    public ResponseEntity<List<Job>> searchJobs(
+            @RequestParam String location) {
 
-        List<Job> result = new ArrayList<>();
-
-        for (Job job : jobs.values()) {
-            if (job.getLocation().equalsIgnoreCase(location)) {
-                result.add(job);
-            }
-        }
-
-        return result;
+        return ResponseEntity.ok(
+                jobService.getJobsByLocation(location)
+        );
     }
 
-    // POST /jobs
-    @PostMapping
-    public ResponseEntity<Job> createJob(@RequestBody Job job) {
+    // Update job
+    @PutMapping("/{id}")
+    public ResponseEntity<Job> updateJob(
+            @PathVariable Long id,
+            @RequestBody Job job) {
 
-        Job savedJob = jobService.createJob(job);
+        Job updatedJob = jobService.updateJob(id, job);
 
-        return new ResponseEntity<>(savedJob, HttpStatus.CREATED);
+        if (updatedJob == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(updatedJob);
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> getJobCount() {
+
+        return ResponseEntity.ok(
+                jobService.getJobCount()
+        );
+    }
+
+    @GetMapping("/company")
+    public ResponseEntity<List<Job>> getJobsByCompany(
+            @RequestParam String name) {
+
+        return ResponseEntity.ok(
+                jobService.getJobsByCompany(name)
+        );
+    }
+
+    // Delete job
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteJob(
+            @PathVariable Long id) {
+
+        boolean deleted = jobService.deleteJob(id);
+
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.noContent().build();
     }
 }
