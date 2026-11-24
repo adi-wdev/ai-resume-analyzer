@@ -20,13 +20,16 @@ public class MatchService {
 
     private final CandidateRepository candidateRepository;
     private final JobRepository jobRepository;
+    private final SkillNormalizer skillNormalizer;
 
     public MatchService(
             CandidateRepository candidateRepository,
-            JobRepository jobRepository
+            JobRepository jobRepository,
+            SkillNormalizer skillNormalizer
     ) {
         this.candidateRepository = candidateRepository;
         this.jobRepository = jobRepository;
+        this.skillNormalizer = skillNormalizer;
     }
 
     public MatchResult calculateMatch(Long candidateId, Long jobId) {
@@ -47,19 +50,20 @@ public class MatchService {
                         )
                 );
 
-        // Step 3: Get candidate and job skills
+        // Step 3: Get skills safely
         List<String> candidateSkills = candidate.getSkills();
         List<String> requiredSkills = job.getRequiredSkills();
+        List<String> preferredSkills = job.getPreferredSkills();
 
-        // Step 4: Prepare collections
+        // Step 4: Normalize candidate skills
         Set<String> normalizedCandidateSkills = new HashSet<>();
 
         if (candidateSkills != null) {
             for (String skill : candidateSkills) {
-                if (skill != null) {
-                    normalizedCandidateSkills.add(
-                            skill.trim().toLowerCase()
-                    );
+                String normalized = skillNormalizer.normalize(skill);
+
+                if (!normalized.isEmpty()) {
+                    normalizedCandidateSkills.add(normalized);
                 }
             }
         }
@@ -67,17 +71,20 @@ public class MatchService {
         List<String> matchedSkills = new ArrayList<>();
         List<String> missingSkills = new ArrayList<>();
 
-        // Step 5: Compare skills
+        List<String> matchedPreferredSkills = new ArrayList<>();
+        List<String> missingPreferredSkills = new ArrayList<>();
+
+        // Step 5: Compare required skills
         if (requiredSkills != null) {
             for (String skill : requiredSkills) {
 
-                if (skill == null || skill.isBlank()) {
+                String normalized = skillNormalizer.normalize(skill);
+
+                if (normalized.isEmpty()) {
                     continue;
                 }
 
-                if (normalizedCandidateSkills.contains(
-                        skill.trim().toLowerCase()
-                )) {
+                if (normalizedCandidateSkills.contains(normalized)) {
                     matchedSkills.add(skill);
                 } else {
                     missingSkills.add(skill);
@@ -85,48 +92,82 @@ public class MatchService {
             }
         }
 
-        // Step 6: Calculate matching percentage
-        double matchScore = 0.0;
+        // Step 6: Compare preferred skills
+        if (preferredSkills != null) {
+            for (String skill : preferredSkills) {
 
-        if (requiredSkills != null && !requiredSkills.isEmpty()) {
+                String normalized = skillNormalizer.normalize(skill);
 
-            int totalRequiredSkills = matchedSkills.size()
-                    + missingSkills.size();
+                if (normalized.isEmpty()) {
+                    continue;
+                }
 
-            if (totalRequiredSkills > 0) {
-                matchScore = (double) matchedSkills.size()
-                        / totalRequiredSkills * 100;
+                if (normalizedCandidateSkills.contains(normalized)) {
+                    matchedPreferredSkills.add(skill);
+                } else {
+                    missingPreferredSkills.add(skill);
+                }
             }
         }
 
-        // Step 7: Check experience eligibility
-        boolean experienceEligible =
-                candidate.getExperience() >= job.getMinimumExperience();
+        // Step 7: Calculate weighted score
+        int matchedWeight = matchedSkills.size() * 2
+                + matchedPreferredSkills.size();
 
-        // Step 8: Determine match category
+        int totalWeight = (matchedSkills.size() + missingSkills.size()) * 2
+                + matchedPreferredSkills.size()
+                + missingPreferredSkills.size();
+
+        double weightedMatchScore = 0.0;
+
+        if (totalWeight > 0) {
+            weightedMatchScore =
+                    (double) matchedWeight / totalWeight * 100;
+        }
+
+        // Step 8: Calculate normal required-skill score
+        int totalRequired = matchedSkills.size() + missingSkills.size();
+
+        double matchScore = 0.0;
+
+        if (totalRequired > 0) {
+            matchScore =
+                    (double) matchedSkills.size() / totalRequired * 100;
+        }
+
+        // Step 9: Determine category using weighted score
         String matchCategory;
 
-        if (matchScore >= 80) {
+        if (weightedMatchScore >= 80) {
             matchCategory = "Excellent Match";
-        } else if (matchScore >= 60) {
+        } else if (weightedMatchScore >= 60) {
             matchCategory = "Good Match";
-        } else if (matchScore >= 40) {
+        } else if (weightedMatchScore >= 40) {
             matchCategory = "Average Match";
         } else {
             matchCategory = "Low Match";
         }
 
-        // Step 9: Generate recommendation
+        // Step 10: Generate recommendation
+        List<String> allMissingSkills = new ArrayList<>();
+        allMissingSkills.addAll(missingSkills);
+        allMissingSkills.addAll(missingPreferredSkills);
+
         String recommendation;
 
-        if (missingSkills.isEmpty()) {
+        if (allMissingSkills.isEmpty()) {
             recommendation = "You have all the required skills.";
         } else {
             recommendation = "Consider learning: "
-                    + String.join(", ", missingSkills);
+                    + String.join(", ", allMissingSkills);
         }
 
-        // Step 10: Create and return result
+        // Step 11: Check experience
+        boolean experienceEligible =
+                job.getMinimumExperience() == null
+                        || candidate.getExperience() >= job.getMinimumExperience();
+
+        // Step 12: Create result
         MatchResult result = new MatchResult(
                 candidate.getName(),
                 job.getJobTitle(),
@@ -137,10 +178,12 @@ public class MatchService {
                 experienceEligible
         );
 
+        result.setMatchedPreferredSkills(matchedPreferredSkills);
+        result.setMissingPreferredSkills(missingPreferredSkills);
+        result.setWeightedMatchScore(weightedMatchScore);
         result.setMatchCategory(matchCategory);
         result.setRecommendation(recommendation);
 
         return result;
     }
 }
- 

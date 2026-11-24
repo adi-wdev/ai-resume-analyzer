@@ -1,6 +1,8 @@
+
 package com.resumeanalyzer.backend.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -30,7 +32,16 @@ public class Job {
             joinColumns = @JoinColumn(name = "job_id")
     )
     @Column(name = "skill")
-    private List<String> requiredSkills;
+    private List<String> requiredSkills = new ArrayList<>();
+
+    // NEW: Preferred skills
+    @ElementCollection
+    @CollectionTable(
+            name = "job_preferred_skills",
+            joinColumns = @JoinColumn(name = "job_id")
+    )
+    @Column(name = "skill")
+    private List<String> preferredSkills = new ArrayList<>();
 
     @Min(value = 0, message = "Minimum experience cannot be negative")
     private Integer minimumExperience;
@@ -84,6 +95,17 @@ public class Job {
     public void setRequiredSkills(List<String> requiredSkills) {
         this.requiredSkills = requiredSkills;
     }
+
+    // NEW: Preferred skills getter and setter
+    public List<String> getPreferredSkills() {
+        return preferredSkills;
+    }
+
+    public void setPreferredSkills(List<String> preferredSkills) {
+        this.preferredSkills = preferredSkills;
+    }
+
+
 
     public Integer getMinimumExperience() {
         return minimumExperience;

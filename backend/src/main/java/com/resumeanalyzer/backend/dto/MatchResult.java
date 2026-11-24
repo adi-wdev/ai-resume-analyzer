@@ -16,6 +16,11 @@ public class MatchResult {
     private List<String> matchedSkills;
     private List<String> missingSkills;
 
+    private double weightedMatchScore;
+
+    private List<String> matchedPreferredSkills;
+    private List<String> missingPreferredSkills;
+
     private boolean experienceEligible;
 
     public MatchResult() {
@@ -101,6 +106,30 @@ public class MatchResult {
 
     public void setMissingSkills(List<String> missingSkills) {
         this.missingSkills = missingSkills;
+    }
+
+    public List<String> getMatchedPreferredSkills() {
+        return matchedPreferredSkills;
+    }
+
+    public void setMatchedPreferredSkills(List<String> matchedPreferredSkills) {
+        this.matchedPreferredSkills = matchedPreferredSkills;
+    }
+
+    public List<String> getMissingPreferredSkills() {
+        return missingPreferredSkills;
+    }
+
+    public void setMissingPreferredSkills(List<String> missingPreferredSkills) {
+        this.missingPreferredSkills = missingPreferredSkills;
+    }
+
+    public double getWeightedMatchScore() {
+        return weightedMatchScore;
+    }
+
+    public void setWeightedMatchScore(double weightedMatchScore) {
+        this.weightedMatchScore = weightedMatchScore;
     }
 
     public boolean isExperienceEligible() {
