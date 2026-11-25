@@ -18,7 +18,7 @@ SKILL_ALIASES = {
     "Docker": ["docker"],
     "Git": ["git"],
     "AWS": ["aws", "amazon web services"],
-    "SQL": ["sql"]
+    "SQL": ["sql"],
     "Kotlin": ["kotlin"],
     "PHP": ["php"],
     "Angular": ["angular"],

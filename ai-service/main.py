@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from skill_extractor import extract_skills, categorize_skills
+from job_matcher import calculate_match
 
 app = FastAPI(
     title="AI Resume Analyzer",
@@ -71,4 +72,80 @@ def about():
         "developer": "Kumar Aditya",
         "technology": "Python and FastAPI",
         "version": "1.0"
+    }
+
+@app.post("/analyze-match")
+def analyze_match(request: ResumeAnalysisRequest):
+
+    result = calculate_match(
+        request.resume_text,
+        request.job_description
+    )
+
+    return {
+        "message": "Resume analysis completed successfully",
+        "analysis": result
+    }
+
+def calculate_match(resume_text, job_description):
+    resume_skills = extract_skills(resume_text)
+    required_skills = extract_skills(job_description)
+
+    # Convert lists into sets to remove duplicates
+    resume_set = set(resume_skills)
+    required_set = set(required_skills)
+
+    # Find matching and missing skills
+    matched_skills = resume_set.intersection(required_set)
+    missing_skills = required_set - resume_set
+
+    # Calculate match percentage
+    if len(required_set) == 0:
+        match_score = 0
+    else:
+        match_score = (
+            len(matched_skills) / len(required_set)
+        ) * 100
+
+    match_score = round(match_score, 2)
+
+    # Assignment 1: Match category
+    if match_score >= 80:
+        category = "Excellent Match"
+    elif match_score >= 60:
+        category = "Good Match"
+    elif match_score >= 40:
+        category = "Moderate Match"
+    else:
+        category = "Low Match"
+
+    # Assignment 2: Dynamic recommendation
+    if len(required_set) == 0:
+        recommendation = (
+            "No recognizable skills were found in the job description. "
+            "Unable to calculate a meaningful match."
+        )
+
+    elif len(missing_skills) == 0:
+        recommendation = (
+            "Excellent! Your resume contains all the required skills."
+        )
+
+    else:
+        missing = ", ".join(sorted(missing_skills))
+
+        recommendation = (
+            f"Your resume matches {match_score}% of the required skills. "
+            f"Consider learning {missing} to improve your compatibility "
+            "with this position."
+        )
+
+    return {
+        "resume_skills": sorted(resume_set),
+        "required_skills": sorted(required_set),
+        "matched_skills": sorted(matched_skills),
+        "missing_skills": sorted(missing_skills),
+        "match_score": match_score,
+        "category": category,
+        "recommendation": recommendation
     }
