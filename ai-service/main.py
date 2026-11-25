@@ -1,5 +1,7 @@
+
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from skill_extractor import extract_skills, categorize_skills
 
 app = FastAPI(
     title="AI Resume Analyzer",
@@ -8,9 +10,10 @@ app = FastAPI(
 )
 
 
+# Request Model
 class ResumeAnalysisRequest(BaseModel):
-    resume_text: str
-    job_description: str
+    resume_text: str = Field(min_length=1)
+    job_description: str = Field(min_length=1)
 
 
 @app.get("/")
@@ -35,8 +38,37 @@ def analyze_resume(request: ResumeAnalysisRequest):
     resume_words = request.resume_text.split()
     job_words = request.job_description.split()
 
+    skills = extract_skills(request.resume_text)
+
     return {
-        "message": "Resume received successfully",
+        "message": "Resume analyzed successfully",
         "resume_word_count": len(resume_words),
-        "job_description_word_count": len(job_words)
+        "job_description_word_count": len(job_words),
+        "resume_character_count": len(request.resume_text),
+        "job_description_character_count": len(request.job_description),
+        "extracted_skills": skills,
+        "skill_categories": categorize_skills(skills)
+    }
+
+
+@app.post("/extract-skills")
+def extract_resume_skills(request: ResumeAnalysisRequest):
+
+    skills = extract_skills(request.resume_text)
+
+    return {
+        "message": "Skills extracted successfully",
+        "skills": skills,
+        "total_skills": len(skills),
+        "skill_categories": categorize_skills(skills)
+    }
+
+
+@app.get("/about")
+def about():
+    return {
+        "project": "AI Resume Analyzer",
+        "developer": "Kumar Aditya",
+        "technology": "Python and FastAPI",
+        "version": "1.0"
     }
