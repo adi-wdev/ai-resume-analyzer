@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from skill_extractor import extract_skills, categorize_skills
 from job_matcher import calculate_match
+from evidence_extractor import extract_skill_evidence
 
 app = FastAPI(
     title="AI Resume Analyzer",
@@ -16,6 +17,8 @@ class ResumeAnalysisRequest(BaseModel):
     resume_text: str = Field(min_length=1)
     job_description: str = Field(min_length=1)
 
+class ResumeEvidenceRequest(BaseModel):
+    resume_text: str = Field(min_length=1)
 
 @app.get("/")
 def home():
@@ -64,14 +67,15 @@ def extract_resume_skills(request: ResumeAnalysisRequest):
         "skill_categories": categorize_skills(skills)
     }
 
+@app.post("/extract-evidence")
+def extract_evidence(request: ResumeEvidenceRequest):
 
-@app.get("/about")
-def about():
+    evidence = extract_skill_evidence(request.resume_text)
+
     return {
-        "project": "AI Resume Analyzer",
-        "developer": "Kumar Aditya",
-        "technology": "Python and FastAPI",
-        "version": "1.0"
+        "message": "Resume evidence extracted successfully",
+        "evidence": evidence,
+        "total_skills": len(evidence)
     }
 
 @app.post("/analyze-match")
@@ -86,6 +90,17 @@ def analyze_match(request: ResumeAnalysisRequest):
         "message": "Resume analysis completed successfully",
         "analysis": result
     }
+
+@app.get("/about")
+def about():
+    return {
+        "project": "AI Resume Analyzer",
+        "developer": "Kumar Aditya",
+        "technology": "Python and FastAPI",
+        "version": "1.0"
+    }
+
+
 
 def calculate_match(resume_text, job_description):
     resume_skills = extract_skills(resume_text)
