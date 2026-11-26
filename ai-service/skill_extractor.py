@@ -1,4 +1,5 @@
 import re
+from text_preprocessor import normalize_text
 
 SKILL_ALIASES = {
     "Java": ["java"],
@@ -37,7 +38,7 @@ SKILL_ALIASES = {
 def extract_skills(text: str):
 
     extracted_skills = []
-    text = text.lower()
+    text = normalize_text(text)
 
     for skill, aliases in SKILL_ALIASES.items():
 
