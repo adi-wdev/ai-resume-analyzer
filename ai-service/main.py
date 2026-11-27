@@ -5,6 +5,7 @@ from skill_extractor import extract_skills, categorize_skills
 from job_matcher import calculate_match
 from evidence_extractor import extract_skill_evidence
 from text_similarity import calculate_text_similarity
+from hybrid_matcher import calculate_hybrid_match
 
 app = FastAPI(
     title="AI Resume Analyzer",
@@ -92,13 +93,17 @@ def analyze_match(request: ResumeAnalysisRequest):
         "analysis": result
     }
 
-@app.get("/about")
-def about():
+@app.post("/hybrid-match")
+def hybrid_match(request: ResumeAnalysisRequest):
+
+    result = calculate_hybrid_match(
+        request.resume_text,
+        request.job_description
+    )
+
     return {
-        "project": "AI Resume Analyzer",
-        "developer": "Kumar Aditya",
-        "technology": "Python and FastAPI",
-        "version": "1.0"
+        "message": "Hybrid resume matching completed successfully",
+        "analysis": result
     }
 
 @app.post("/text-similarity")
@@ -113,6 +118,17 @@ def text_similarity(request: ResumeAnalysisRequest):
         "message": "Text similarity calculated successfully",
         "analysis": result
     }
+
+
+@app.get("/about")
+def about():
+    return {
+        "project": "AI Resume Analyzer",
+        "developer": "Kumar Aditya",
+        "technology": "Python and FastAPI",
+        "version": "1.0"
+    }
+
 
 
 def calculate_match(resume_text, job_description):
