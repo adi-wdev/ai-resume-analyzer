@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from skill_extractor import extract_skills, categorize_skills
 from job_matcher import calculate_match
 from evidence_extractor import extract_skill_evidence
+from text_similarity import calculate_text_similarity
 
 app = FastAPI(
     title="AI Resume Analyzer",
@@ -100,6 +101,18 @@ def about():
         "version": "1.0"
     }
 
+@app.post("/text-similarity")
+def text_similarity(request: ResumeAnalysisRequest):
+
+    result = calculate_text_similarity(
+        request.resume_text,
+        request.job_description
+    )
+
+    return {
+        "message": "Text similarity calculated successfully",
+        "analysis": result
+    }
 
 
 def calculate_match(resume_text, job_description):
