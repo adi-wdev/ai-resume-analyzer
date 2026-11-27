@@ -22,6 +22,15 @@ class ResumeAnalysisRequest(BaseModel):
 class ResumeEvidenceRequest(BaseModel):
     resume_text: str = Field(min_length=1)
 
+class JobDescription(BaseModel):
+    job_title: str = Field(min_length=1)
+    job_description: str = Field(min_length=1)
+
+
+class MultipleJobComparisonRequest(BaseModel):
+    resume_text: str = Field(min_length=1)
+    jobs: list[JobDescription] = Field(min_length=1)
+
 @app.get("/")
 def home():
     return {
@@ -119,6 +128,23 @@ def text_similarity(request: ResumeAnalysisRequest):
         "analysis": result
     }
 
+@app.post("/compare-jobs")
+def compare_jobs(request: MultipleJobComparisonRequest):
+
+    jobs = [
+        job.model_dump()
+        for job in request.jobs
+    ]
+
+    result = compare_multiple_jobs(
+        request.resume_text,
+        jobs
+    )
+
+    return {
+        "message": "Multiple job comparison completed successfully",
+        "analysis": result
+    }
 
 @app.get("/about")
 def about():
