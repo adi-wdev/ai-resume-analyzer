@@ -6,6 +6,7 @@ from job_matcher import calculate_match
 from evidence_extractor import extract_skill_evidence
 from text_similarity import calculate_text_similarity
 from hybrid_matcher import calculate_hybrid_match
+from learning_recommender import generate_learning_roadmap
 
 app = FastAPI(
     title="AI Resume Analyzer",
@@ -30,6 +31,9 @@ class JobDescription(BaseModel):
 class MultipleJobComparisonRequest(BaseModel):
     resume_text: str = Field(min_length=1)
     jobs: list[JobDescription] = Field(min_length=1)
+
+class LearningRoadmapRequest(BaseModel):
+    missing_skills: list[str]
 
 @app.get("/")
 def home():
@@ -143,6 +147,16 @@ def compare_jobs(request: MultipleJobComparisonRequest):
 
     return {
         "message": "Multiple job comparison completed successfully",
+        "analysis": result
+    }
+
+@app.post("/learning-roadmap")
+def learning_roadmap(request: LearningRoadmapRequest):
+
+    result = generate_learning_roadmap(request.missing_skills)
+
+    return {
+        "message": "Learning roadmap generated successfully",
         "analysis": result
     }
 

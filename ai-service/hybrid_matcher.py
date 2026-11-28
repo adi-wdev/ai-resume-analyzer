@@ -1,5 +1,6 @@
 from job_matcher import calculate_match
 from text_similarity import calculate_text_similarity
+from learning_recommender import generate_learning_roadmap
 
 
 def calculate_hybrid_match(resume_text, job_description):
@@ -14,6 +15,7 @@ def calculate_hybrid_match(resume_text, job_description):
 
     matched_skills = skill_result["matched_skills"]
     missing_skills = skill_result["missing_skills"]
+    learning_roadmap = generate_learning_roadmap(missing_skills)
     extra_skills = skill_result.get("extra_skills", [])
 
     required_skills = skill_result["required_skills"]
@@ -107,6 +109,7 @@ def calculate_hybrid_match(resume_text, job_description):
 
         "matched_skills": matched_skills,
         "missing_skills": missing_skills,
+        "learning_roadmap": learning_roadmap,
         "extra_skills": extra_skills,
 
         "skill_summary": {
