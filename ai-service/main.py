@@ -9,6 +9,9 @@ from hybrid_matcher import calculate_hybrid_match
 from learning_recommender import generate_learning_roadmap
 from resume_improver import generate_resume_improvements
 from ats_checker import check_ats_compatibility
+from fastapi import UploadFile, File, HTTPException
+from pdf_parser import extract_text_from_pdf
+from skill_extractor import extract_skills
 
 app = FastAPI(
     title="AI Resume Analyzer",
@@ -50,6 +53,54 @@ def home():
         "message": "Welcome to AI Resume Analyzer AI Service",
         "status": "Running"
     }
+
+
+@app.post("/upload-resume")
+async def upload_resume(file: UploadFile = File(...)):
+
+    # Assignment 1: Validate file extension
+    if not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(
+            status_code=400,
+            detail="Only PDF files are allowed."
+        )
+
+    pdf_bytes = await file.read()
+
+    # Assignment 3: Validate file size
+    if len(pdf_bytes) > 5 * 1024 * 1024:
+        raise HTTPException(
+            status_code=400,
+            detail="PDF file size cannot exceed 5 MB."
+        )
+
+    try:
+        # Extract text from PDF
+        result = extract_text_from_pdf(pdf_bytes)
+
+        extracted_text = result["extracted_text"]
+
+        # Assignment 4: Extract skills automatically
+        extracted_skills = extract_skills(extracted_text)
+
+        return {
+            "message": result["message"],
+            "filename": file.filename,
+            "total_pages": result["total_pages"],
+            "character_count": result["character_count"],
+            "extracted_text": extracted_text,
+            "extracted_skills": extracted_skills,
+            "total_skills": len(extracted_skills)
+        }
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error)
+        )
+
+    finally:
+        await file.close()
 
 
 @app.get("/health")
