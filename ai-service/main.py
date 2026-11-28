@@ -8,6 +8,7 @@ from text_similarity import calculate_text_similarity
 from hybrid_matcher import calculate_hybrid_match
 from learning_recommender import generate_learning_roadmap
 from resume_improver import generate_resume_improvements
+from ats_checker import check_ats_compatibility
 
 app = FastAPI(
     title="AI Resume Analyzer",
@@ -39,6 +40,9 @@ class LearningRoadmapRequest(BaseModel):
 class ResumeImprovementRequest(BaseModel):
     resume_text: str = Field(min_length=1)
     job_description: str = Field(min_length=1)
+
+class ATSCheckRequest(BaseModel):
+    resume_text: str = Field(min_length=1)
 
 @app.get("/")
 def home():
@@ -175,6 +179,18 @@ def improve_resume(request: ResumeImprovementRequest):
 
     return {
         "message": "Resume improvement analysis completed successfully",
+        "analysis": result
+    }
+
+@app.post("/check-ats")
+def check_ats(request: ATSCheckRequest):
+
+    result = check_ats_compatibility(
+        request.resume_text
+    )
+
+    return {
+        "message": "ATS compatibility check completed successfully",
         "analysis": result
     }
 
